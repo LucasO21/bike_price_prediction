@@ -1,16 +1,9 @@
-# BIKE PRICING PREDICTION ----
-# DATA PREPARATION SCRIPT ----
-# # **** ----
+# FUNCTIONS FOR ANALYSIS ----
+# **** ----
 
-# SETUP ----
-
-# Working Dir ----
-setwd(here::here("R"))
-
-# * Libraries ----
+# Libraries ----
 library(tidyverse)
 library(janitor)
-library(lubridate)
 
 # * Load Data ----
 bike_data_raw_tbl <- data.table::fread("../data/cannondale_bikes_2019.csv") %>% 
