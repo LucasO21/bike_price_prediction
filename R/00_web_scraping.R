@@ -1,5 +1,6 @@
 # BIKE PRICING PREDICTION ----
 # WEBSCRAPING SCRIPT ----
+# WEBSITE URL - # "https://www.trekbikes.com/us/en_US/"
 # # **** ----
 
 # Working Dir ----
@@ -14,9 +15,6 @@ library(fs)
 library(furrr)
 library(xopen)
 library(tictoc)
-
-# Website URL ----
-# "https://www.trekbikes.com/us/en_US/"
 
 
 # ******************************************************************************
@@ -84,15 +82,8 @@ mountain_bikes_url_tbl <- tibble(
 
 # * City Bikes ----
 city_bikes_url_tbl <- tibble(
-    family = c("Urban & Commuter", "Electric & Hybrid", "Comfort & Recreation", 
-               "Fitness", "Townie"),
-    url = c(
-        "https://www.trekbikes.com/us/en_US/bikes/hybrid-bikes/urban-commuter-bikes/c/B440/?pageSize=72&q=%3Arelevance&sort=relevance#",
-        "https://www.trekbikes.com/us/en_US/bikes/hybrid-bikes/electric-hybrid-bikes/c/B550/?pageSize=72&q=%3Arelevance&sort=relevance#",
-        "https://www.trekbikes.com/us/en_US/bikes/hybrid-bikes/comfort-recreation-bikes/c/B410/?pageSize=72&q=%3Arelevance&sort=relevance#",
-        "https://www.trekbikes.com/us/en_US/bikes/hybrid-bikes/fitness-bikes/c/B420/?pageSize=72&q=%3Arelevance&sort=relevance#",
-        "https://www.trekbikes.com/us/en_US/bikes/electra-bikes/townie/c/EB300/?pageSize=72&q=%3Arelevance&sort=relevance#"
-    )
+    family = c("All City"),
+    url = c("https://www.trekbikes.com/us/en_US/bikes/hybrid-bikes/electric-hybrid-bikes/c/B550/")
 ) %>% 
     mutate(category = "City", .before = family)
 
@@ -103,7 +94,6 @@ final_bikes_url_tbl <- bind_rows(
     mountain_bikes_url_tbl,
     city_bikes_url_tbl
 )
-
 
 
 # ******************************************************************************
@@ -121,7 +111,7 @@ url_html %>%
     mutate(full_product_url = paste0(base_url, url)) %>% 
     filter(!str_detect(product_url, "frameset"))
 
-# Function To Get Product URLs ----
+# * Function To Get Product URLs ----
 get_bikes_urls <- function(url) {
     
     base_url  <- "https://www.trekbikes.com/"
@@ -141,7 +131,7 @@ get_bikes_urls <- function(url) {
 get_bikes_urls(url)
 
 
-# Scale Up To All Product Categories ----
+# * Scale Up To All Product Categories ----
 plan("multisession")
 bikes_url_tbl <- road_bikes_url_tbl %>% 
     mutate(product_urls = future_map(url, get_bikes_urls)) 
@@ -153,18 +143,8 @@ bikes_url_tbl <- bikes_url_tbl %>%
 bikes_url_tbl %>% View()
 
 
-# Web Scrape Bike Information ----
-url <- "https://www.trekbikes.com/us/en_US/bikes/hybrid-bikes/electric-hybrid-bikes/dual-sport/dual-sport-2/p/35854/?colorCode=grey"
-
-# product_name <- read_html(url) %>% 
-#     html_element("[product-name]") %>% 
-#     html_attr("product-name")
-# 
-# product_name <- read_html(url) %>% 
-#     html_nodes("title") %>% 
-#     html_text()
-# 
-# product_name <- sub("\\|.*", "", product_name)
+# * Web Scrape Bike Information ----
+url <- "https://www.trekbikes.com//us/en_US/bikes/electra-bikes/electra-e-bikes/townie-go/townie-go-5i-eq-step-thru/p/33004/"
 
 product_name <- read_html(url) %>% 
     html_element("#gtm-product-name") %>% 
@@ -177,13 +157,11 @@ product_id <- read_html(url) %>%
 
 product_price <- read_html(url) %>% 
     html_element("#gtm-product-display-price") %>% 
-    html_attr("value") %>% 
-    as.numeric()
+    html_attr("value")
 
 product_year <- read_html(url) %>% 
     html_element("[product-model-year]") %>% 
-    html_attr("product-model-year") %>% 
-    as.numeric()
+    html_attr("product-model-year") 
 
 product_image_url <- read_html(url) %>% 
     html_element("[image-url]") %>% 
@@ -254,20 +232,17 @@ get_bikes_data <- function(url){
     # product id
     product_id <- read_html(url) %>% 
         html_element("#gtm-product-code") %>% 
-        html_attr("value") %>% 
-        as.numeric()
+        html_attr("value") 
     
     # product price
     product_price <- read_html(url) %>% 
         html_element("#gtm-product-display-price") %>% 
-        html_attr("value") %>% 
-        as.numeric()
+        html_attr("value") 
     
     # product year
     product_year <- read_html(url) %>% 
         html_element("[product-model-year]") %>% 
-        html_attr("product-model-year") %>% 
-        as.numeric()
+        html_attr("product-model-year") 
     
     # product image url
     product_image_url <- read_html(url) %>% 
@@ -286,17 +261,18 @@ get_bikes_data <- function(url){
                             "Motor", "Weight")
     
     # specs dataframe
-    specs_tbl <- tibble(X1 = specs_cols_to_keep) %>% 
+    specs_tbl <- tibble(x1 = specs_cols_to_keep) %>% 
         left_join(
             bind_rows(specs_info) %>%
-                filter(X1 %in% specs_cols_to_keep)
+                clean_names() %>% 
+                filter(x1 %in% specs_cols_to_keep)
         ) %>% 
-        spread(X1, X2) %>% 
+        spread(x1, x2) %>% 
         clean_names()
     
     # final product dataframe
     final_product_tbl <- tibble(
-        product_id, 
+        #product_id, 
         product_name, 
         product_price, 
         product_year,
@@ -307,6 +283,8 @@ get_bikes_data <- function(url){
     return(final_product_tbl)
     
 }
+
+get_bikes_data(url)
 
 
 # ******************************************************************************
@@ -322,11 +300,62 @@ toc()
 # Unnest Product URLs Table ----
 product_url_unest_tbl <- product_url_tbl %>% 
     unnest() %>% 
-    mutate(product_id = gsub("[^0-9.-]", "", stri_sub(full_product_url, -6))) 
+    mutate(product_id = gsub("[^0-9.-]", "", stri_sub(full_product_url, -6))) %>% 
+    distinct()
 
 product_url_unest_tbl %>% View()
 
+product_url_unest_tbl %>% 
+    select(full_product_url) %>% 
+    count(full_product_url, sort = TRUE)
+
 
 # * Scrape Data For Each Product URL ----
+
+# - Slicing the data by rows of 50 each. 
+# - Some rows were throwing errors so I need to narrow down to find the rows.
+# - I Skipped the last 15 rows from product_url_unest_tbl as some of these were causing errors
+
+product_details_tbl_1 <- product_url_unest_tbl %>% 
+    slice(1:50) %>% 
+    mutate(product_details = future_map(full_product_url, get_bikes_data))
+
+product_details_tbl_2 <- product_url_unest_tbl %>% 
+    slice(51:100) %>% 
+    mutate(product_details = future_map(full_product_url, get_bikes_data))
+
+product_details_tbl_3 <- product_url_unest_tbl %>% 
+    slice(101:150) %>% 
+    mutate(product_details = future_map(full_product_url, get_bikes_data))
+
+product_details_tbl_4 <- product_url_unest_tbl %>% 
+    slice(151:200) %>% 
+    mutate(product_details = future_map(full_product_url, get_bikes_data))
+
+product_details_tbl_5 <- product_url_unest_tbl %>% 
+    slice(201:220) %>% 
+    mutate(product_details = future_map(full_product_url, get_bikes_data))
+
+product_details_tbl_6 <- product_url_unest_tbl %>% 
+    slice(221:230) %>% 
+    mutate(product_details = future_map(full_product_url, get_bikes_data))
+
+product_details_tbl <- bind_rows(
+    product_details_tbl_1,
+    product_details_tbl_2,
+    product_details_tbl_3,
+    product_details_tbl_4,
+    product_details_tbl_5,
+    product_details_tbl_6
+) %>% 
+    unnest(product_details)
+
+product_details_tbl %>% glimpse()
+
+# ******************************************************************************
+# SAVE DATASET ----
+# ******************************************************************************
+product_details_tbl %>% write_rds("data/trekbikes_raw_data.rds")
+
 
 
