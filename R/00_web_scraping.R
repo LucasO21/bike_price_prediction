@@ -358,4 +358,36 @@ product_details_tbl %>% glimpse()
 product_details_tbl %>% write_rds("data/trekbikes_raw_data.rds")
 
 
+# ******************************************************************************
+# DOWNLOAD PRODUCT IMAGES ----
+# ******************************************************************************
+
+# * Get Product Image URLs ----
+product_image_tbl <- product_details_tbl %>% 
+    filter(!str_detect(product_name, "Frameset")) %>% 
+    mutate(concat = paste(product_id, product_image_url, sep = " ")) %>% 
+    select(concat) 
+product_image_tbl %>% View()
+
+
+# * Function To Download & Save Images ----
+get_bikes_images <- function(x) {
+    
+    pid  = sub(" .*", "", x)
+    url  = sub(".* ", "", x)
+    path = paste0("../jpg/", "product_id_", pid, ".jpg")
+    
+    download.file(url = paste0("https:", url), destfile = path, mode = "wb")
+    
+}
+
+# * Download & Save Images ----
+plan("multisession")
+walk(product_image_tbl$concat, get_bikes_images)
+
+
+
+
+
+
 
