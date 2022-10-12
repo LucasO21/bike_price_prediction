@@ -135,7 +135,14 @@ final_bikes_tbl <- bikes_data_raw_tbl %>%
     # rearrange columns
     select(product_id, model_base, model_tier, category, family, frame_material, product_price,
            weight, ultegra, dura_ace, disc, team, shimano, sram, bosch, 
-           battery, charger, controller, motor, shock)
+           battery, charger, controller, motor, shock) %>% 
+    
+    # fix price
+    mutate(product_price = as.numeric(product_price))
 
 final_bikes_tbl %>% View()
-    
+final_bikes_tbl %>% glimpse()
+
+# Save Final Data Set ----
+final_bikes_tbl %>% write_rds("../data/trekbikes_clead_data.rds")
+
