@@ -130,10 +130,10 @@ final_bikes_tbl <- bikes_data_raw_tbl %>%
     setNames(names(.) %>% str_remove_all("_flag")) %>% 
     
     # add other features
-    bind_cols(model_tbl, weight_tbl, other_features_tbl) %>% 
+    bind_cols(model_tbl, weight_tbl, frame_tbl, other_features_tbl) %>% 
     
     # rearrange columns
-    select(product_id, model_base, model_tier, category, family, product_price,
+    select(product_id, model_base, model_tier, category, family, frame_material, product_price,
            weight, ultegra, dura_ace, disc, team, shimano, sram, bosch, 
            battery, charger, controller, motor, shock)
 
