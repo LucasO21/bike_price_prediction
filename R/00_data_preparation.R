@@ -10,22 +10,21 @@ setwd(here::here("R"))
 # * Libraries ----
 library(tidyverse)
 library(janitor)
-library(lubridate)
 
 # * Load Data ----
-bikes_data_raw_tbl <- read_rds("../data/trekbikes_raw_data.rds") %>% 
+bikes_raw_tbl <- read_rds("../data/trekbikes_raw_data.rds") %>% 
     as_tibble() %>% 
     clean_names() 
     
 # * Format Data ----
 # - Drop "frameset"
 # - Remove unwanted columns
-bikes_data_raw_tbl <- bikes_data_raw_tbl %>% 
+bikes_raw_tbl <- bikes_raw_tbl %>% 
     filter(!str_detect(product_name, "Frameset")) %>% 
     select(-c(url, full_product_url, product_image_url, position, fork))
 
 # * Bike Model ----
-model_tbl <- bikes_data_raw_tbl %>% 
+model_tbl <- bikes_raw_tbl %>% 
     select(product_name) %>% 
     separate(col = product_name, sep = " ", into = str_c("col_", 1:10), remove = FALSE) %>% 
     mutate(model_base = case_when(
@@ -48,11 +47,12 @@ model_tbl <- bikes_data_raw_tbl %>%
     
     # get model tier features
     mutate(model_tier = product_name %>% str_replace(model_base, replacement = "") %>% str_trim()) %>% 
-    select(model_base, model_tier)
+    select(product_name, model_base, model_tier) %>% 
+    rename(model_name = product_name)
 
 
 # * Bike Weight ----
-weight_tbl <- bikes_data_raw_tbl %>% 
+weight_tbl <- bikes_raw_tbl %>% 
     select(weight) %>% 
     separate(col = weight, sep = "/", into = c("kg", "lbs")) %>% 
     select(lbs) %>% 
@@ -62,16 +62,16 @@ weight_tbl <- bikes_data_raw_tbl %>%
     mutate(weight = as.numeric(weight))
 
 # * Bike Tire ----
-tire_tbl <- bikes_data_raw_tbl %>% 
-    select(tire) %>% 
-    separate(col = tire, sep = " ", into = str_c("col_", 1:10)) %>% 
-    select(col_2) %>% 
-    rename(tire_spec = col_2)
+# tire_tbl <- bikes_data_raw_tbl %>% 
+#     select(tire) %>% 
+#     separate(col = tire, sep = " ", into = str_c("col_", 1:10)) %>% 
+#     select(col_2) %>% 
+#     rename(tire_spec = col_2)
 
 
 # * Bike Frame Material ----
 # - Flag "frame" feature for Carbon or Aluminum
-frame_tbl <- bikes_data_raw_tbl %>% 
+frame_tbl <- bikes_raw_tbl %>% 
     select(frame) %>% 
     mutate(frame_material = case_when(
         
@@ -89,7 +89,7 @@ frame_tbl <- bikes_data_raw_tbl %>%
 
 # * Bike Other Features ----
 # - Flag other features
-other_features_tbl <- bikes_data_raw_tbl %>% 
+other_features_tbl <- bikes_raw_tbl %>% 
     mutate(concat = paste(
         brake, chain, front_derailleur, rear_derailleur, rim, shifter,
         sep = " "
@@ -111,7 +111,7 @@ other_features_tbl <- bikes_data_raw_tbl %>%
     select(-concat)
 
 
-final_bikes_tbl <- bikes_data_raw_tbl %>% 
+final_bikes_tbl <- bikes_raw_tbl %>% 
     
     # select features
     select(product_id, category, family, product_price, battery, charger, controller, motor, shock) %>% 
@@ -133,7 +133,7 @@ final_bikes_tbl <- bikes_data_raw_tbl %>%
     bind_cols(model_tbl, weight_tbl, frame_tbl, other_features_tbl) %>% 
     
     # rearrange columns
-    select(product_id, model_base, model_tier, category, family, frame_material, product_price,
+    select(product_id, model_name, model_base, model_tier, category, family, frame_material, product_price,
            weight, ultegra, dura_ace, disc, team, shimano, sram, bosch, 
            battery, charger, controller, motor, shock) %>% 
     
