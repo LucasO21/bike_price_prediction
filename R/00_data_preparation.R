@@ -114,7 +114,7 @@ other_features_tbl <- bikes_raw_tbl %>%
 final_bikes_tbl <- bikes_raw_tbl %>% 
     
     # select features
-    select(product_id, category, family, product_price, battery, charger, controller, motor, shock) %>% 
+    select(product_id, category, family, product_price, product_year, battery, charger, controller, motor, shock) %>% 
     
     # create flags for battery, charger, controller, motor and shock
     mutate(
@@ -133,7 +133,7 @@ final_bikes_tbl <- bikes_raw_tbl %>%
     bind_cols(model_tbl, weight_tbl, frame_tbl, other_features_tbl) %>% 
     
     # rearrange columns
-    select(product_id, model_name, model_base, model_tier, category, family, frame_material, product_price,
+    select(product_id, model_name, product_year, model_base, model_tier, category, family, frame_material, product_price,
            weight, ultegra, dura_ace, disc, team, shimano, sram, bosch, 
            battery, charger, controller, motor, shock) %>% 
     
@@ -142,6 +142,7 @@ final_bikes_tbl <- bikes_raw_tbl %>%
 
 final_bikes_tbl %>% View()
 final_bikes_tbl %>% glimpse()
+final_bikes_tbl %>% sapply(function(x) sum(is.na(x)))
 
 # Save Final Data Set ----
 final_bikes_tbl %>% write_rds("../data/trekbikes_clead_data.rds")
