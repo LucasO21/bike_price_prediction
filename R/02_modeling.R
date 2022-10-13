@@ -303,3 +303,16 @@ tune_results_earth %>% show_best("rmse", n = 5)
 wflw_fit_earth_tuned <- wflw_spec_earth_tune %>% 
     finalize_workflow(select_best(tune_results_earth, "rmse")) %>% 
     fit(bikes_tbl)
+
+
+# ******************************************************************************
+# SAVING ----
+# ******************************************************************************
+model_artifacts <- list(
+    xgboost       = wflw_fit_xgboost_tuned,
+    random_forest = wflw_fit_rf_tuned,
+    glmnet        = wflw_fit_glmnet_tuned,
+    earth         = wflw_fit_earth_tuned
+)
+
+model_artifacts %>% write_rds("../artifacts/model_artifacts.rds")
