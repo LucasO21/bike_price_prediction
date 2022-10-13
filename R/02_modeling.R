@@ -6,21 +6,19 @@
 # SETUP ----
 # ******************************************************************************
 
-
 # Working Dir ----
 setwd(here::here("R"))
 
 # * Libraries ----
 library(tidyverse)
 library(janitor)
-library(lubridate)
 library(tidymodels)
 library(xgboost)
 library(rules)
 library(tictoc)
-library(future)
-library(doFuture)
-library(parallel)
+# library(future)
+# library(doFuture)
+# library(parallel)
 
 # ******************************************************************************
 # LOAD DATA ----
@@ -51,7 +49,7 @@ resamples_obj <- vfold_cv(train_tbl, v = 10)
 # RECIPE ----
 # ******************************************************************************
 recipe_spec <- recipe(product_price ~ ., data = train_tbl) %>% 
-    step_rm(product_id, model_tier) %>% 
+    step_rm(product_id, model_tier, model_name) %>% 
     step_novel(family, model_base, frame_material, category) %>% 
     step_dummy(model_base, category, family, frame_material, one_hot = TRUE)
 
@@ -171,8 +169,8 @@ tune_results_xgboost <- tune_grid(
     object    = wflw_spec_xgboost_tune,
     resamples = resamples_obj,
     grid      = grid_latin_hypercube(parameters(model_spec_xgboost_tune) %>% 
-                                         update(mtry = mtry(range = c(1, 20))),
-                                     size = 10),
+                                         update(mtry = mtry(range = c(1, 21))),
+                                     size = 15),
     control   = control_grid(save_pred = TRUE, verbose = FALSE, allow_par = TRUE),
     metrics   = metric_set(mae, rmse, rsq)
 )
@@ -217,8 +215,8 @@ tune_results_rf <- tune_grid(
     object    = wflw_spec_rf_tune,
     resamples = resamples_obj,
     grid      = grid_latin_hypercube(parameters(model_spec_ranger_tune) %>% 
-                                         update(mtry = mtry(range = c(1, 20))),
-                                     size = 10),
+                                         update(mtry = mtry(range = c(1, 21))),
+                                     size = 15),
     control   = control_grid(save_pred = TRUE, verbose = FALSE, allow_par = TRUE),
     metrics   = metric_set(mae, rmse, rsq)
 )
@@ -254,7 +252,7 @@ tune_results_glmnet <- tune_grid(
     object    = wflw_spec_glmnet_tune,
     resamples = resamples_obj,
     grid      = grid_latin_hypercube(parameters(model_spec_glmnet_tune),
-                                     size = 10),
+                                     size = 15),
     control   = control_grid(save_pred = TRUE, verbose = FALSE, allow_par = TRUE),
     metrics   = metric_set(mae, rmse, rsq)
 )
@@ -290,7 +288,7 @@ tune_results_earth <- tune_grid(
     object    = wflw_spec_earth_tune,
     resamples = resamples_obj,
     grid      = grid_latin_hypercube(parameters(model_spec_earth_tuned),
-                                     size = 10),
+                                     size = 15),
     control   = control_grid(save_pred = TRUE, verbose = FALSE, allow_par = TRUE),
     metrics   = metric_set(mae, rmse, rsq)
 )
