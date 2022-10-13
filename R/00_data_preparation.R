@@ -138,11 +138,31 @@ final_bikes_tbl <- bikes_raw_tbl %>%
            battery, charger, controller, motor, shock) %>% 
     
     # fix price
-    mutate(product_price = as.numeric(product_price))
+    mutate(product_price = as.numeric(product_price)) %>% 
+    
+    # handle NAs
+    mutate(product_year = case_when(
+        model_base == "Émonda" & is.na(product_year) ~ 2022,
+        model_base == "Domane" & is.na(product_year) ~ 2022,
+        model_base == "Top Fuel" & is.na(product_year) ~ 2022,
+        model_base == "X-Caliber" & is.na(product_year) ~ 2022,
+        TRUE ~ product_year
+    )) %>% 
+    
+    # fix names
+    rename(model_year = product_year) %>% 
+    rename(model_price = product_price)
 
 final_bikes_tbl %>% View()
 final_bikes_tbl %>% glimpse()
 final_bikes_tbl %>% sapply(function(x) sum(is.na(x)))
+
+
+# # Handle NAs (Product Year) ----
+# final_bikes_tbl %>% 
+#     group_by(model_base) %>% 
+#     summarise(mean_year = mean(product_year, na.rm = TRUE)) %>% 
+#     View()
 
 # Save Final Data Set ----
 final_bikes_tbl %>% write_rds("../data/trekbikes_clead_data.rds")
