@@ -138,7 +138,7 @@ baseline_model_metrics_tbl <- bind_rows(
 # HYPER - PARAMETER TUNING ----
 # ******************************************************************************
 
-# * Xgboost ----
+# * XGBOOST TUNE ----
 # ** Spec ----
 model_spec_xgboost_tune <- boost_tree(
     mode           = "regression",
@@ -181,9 +181,13 @@ toc()
 # ** Results ----
 tune_results_xgboost %>% show_best("rmse", n = 5)
 
+# ** Finalize Fit ----
+wflw_fit_xgboost_tuned <- wflw_spec_xgboost_tune %>% 
+    finalize_workflow(select_best(tune_results_xgboost, "rmse")) %>% 
+    fit(bikes_tbl)
 
-# * Ranger Tune ----
 
+# * RANDOM FOREST TUNE ----
 # ** Spec ----
 model_spec_ranger_tune <- rand_forest(
     mode           = "regression",
@@ -202,15 +206,15 @@ workflow() %>%
     hardhat::extract_parameter_dials("mtry")
 
 # ** Workflow ----
-wflw_spec_ranger_tune <- workflow() %>% 
+wflw_spec_rf_tune <- workflow() %>% 
     add_model(model_spec_ranger_tune) %>% 
-    add_recipe(recipe_spec %>% step_rm(date))
+    add_recipe(recipe_spec)
 
 # ** Tuning ----
 tic()
 set.seed(123)
 tune_results_rf <- tune_grid(
-    object    = wflw_spec_ranger_tune,
+    object    = wflw_spec_rf_tune,
     resamples = resamples_obj,
     grid      = grid_latin_hypercube(parameters(model_spec_ranger_tune) %>% 
                                          update(mtry = mtry(range = c(1, 20))),
@@ -220,3 +224,82 @@ tune_results_rf <- tune_grid(
 )
 toc()
 
+# ** Results ----
+tune_results_rf %>% show_best("rmse", n = 5)
+
+# ** Finalize ----
+wflw_fit_rf_tuned <- wflw_spec_rf_tune %>% 
+    finalize_workflow(select_best(tune_results_rf, "rmse")) %>% 
+    fit(bikes_tbl)
+
+
+# * GLMNET TUNE ----
+# ** Spec ----
+model_spec_glmnet_tune <- linear_reg(
+    mode    = "regression",
+    mixture = tune(),
+    penalty = tune()
+) %>% 
+    set_engine("glmnet")
+
+# ** Workflow ----
+wflw_spec_glmnet_tune <- workflow() %>% 
+    add_model(model_spec_glmnet_tune) %>% 
+    add_recipe(recipe_spec)
+
+# ** Tuning ----
+tic()
+set.seed(123)
+tune_results_glmnet <- tune_grid(
+    object    = wflw_spec_glmnet_tune,
+    resamples = resamples_obj,
+    grid      = grid_latin_hypercube(parameters(model_spec_glmnet_tune),
+                                     size = 10),
+    control   = control_grid(save_pred = TRUE, verbose = FALSE, allow_par = TRUE),
+    metrics   = metric_set(mae, rmse, rsq)
+)
+toc()
+
+# ** Results ----
+tune_results_glmnet %>% show_best("rmse", n = 5)
+
+# ** Finalize ----
+wflw_fit_glmnet_tuned <- wflw_spec_glmnet_tune %>% 
+    finalize_workflow(select_best(tune_results_glmnet, "rmse")) %>% 
+    fit(bikes_tbl)
+
+
+# * EARTH TUNE ----
+# ** Spec ----
+model_spec_earth_tuned <- mars(
+    mode        = "regression",
+    num_terms   = tune(),
+    prod_degree =  tune()
+) %>% 
+    set_engine("earth")
+
+# ** Workflow ----
+wflw_spec_earth_tune <- workflow() %>% 
+    add_model(model_spec_earth_tuned) %>% 
+    add_recipe(recipe_spec)
+
+# ** Tuning ----
+tic()
+set.seed(123)
+tune_results_earth <- tune_grid(
+    object    = wflw_spec_earth_tune,
+    resamples = resamples_obj,
+    grid      = grid_latin_hypercube(parameters(model_spec_earth_tuned),
+                                     size = 10),
+    control   = control_grid(save_pred = TRUE, verbose = FALSE, allow_par = TRUE),
+    metrics   = metric_set(mae, rmse, rsq)
+)
+toc()
+
+# ** Results ----
+tune_results_earth %>% show_best("rmse", n = 5)
+
+# ** Finalize ----
+wflw_fit_earth_tuned <- wflw_spec_earth_tune %>% 
+    finalize_workflow(select_best(tune_results_earth, "rmse")) %>% 
+    fit(bikes_tbl)
