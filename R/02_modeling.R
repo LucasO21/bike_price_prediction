@@ -23,9 +23,7 @@ library(tictoc)
 # ******************************************************************************
 # LOAD DATA ----
 # ******************************************************************************
-bikes_tbl <- read_rds("../data/trekbikes_clead_data.rds") %>% 
-    rename(model_year = product_year) %>% 
-    rename(model_price = product_price)
+bikes_tbl <- read_rds("../data/trekbikes_clead_data.rds") 
 
 bikes_tbl %>% glimpse()
 bikes_tbl %>% sapply(function(x) sum(is.na(x)))
@@ -44,7 +42,7 @@ test_tbl  <- testing(split_obj)
 # CROSS VALIDATION SPECS ----
 # ******************************************************************************
 set.seed(101)
-resamples_obj <- vfold_cv(train_tbl, v = 10)
+resamples_obj <- vfold_cv(train_tbl, v = 10, strata = family)
 
 
 # ******************************************************************************
@@ -66,13 +64,13 @@ wflw_fit_glmnet <- workflow() %>%
     add_model(spec = linear_reg(penalty = 0.1, mixture = 0.5) %>% 
                   set_engine("glmnet")
     ) %>% 
-    add_recipe(recipe_spec %>% step_normalize(weight, model_year)) %>% 
+    add_recipe(recipe_spec) %>% 
     fit(train_tbl)
 
 # * SVM ----
 wflw_fit_svm <- workflow() %>% 
     add_model(spec = svm_rbf(mode = "regression") %>% set_engine("kernlab")) %>% 
-    add_recipe(recipe_spec %>% step_normalize(weight, model_year)) %>% 
+    add_recipe(recipe_spec) %>% 
     fit(train_tbl)
 
 # * Random Forest ----
@@ -171,9 +169,9 @@ tune_results_xgboost <- tune_grid(
     object    = wflw_spec_xgboost_tune,
     resamples = resamples_obj,
     grid      = grid_latin_hypercube(parameters(model_spec_xgboost_tune) %>% 
-                                         update(mtry = mtry(range = c(1, 21)),
-                                                trees = trees(range = c(500, 1000)),
-                                                learn_rate = learn_rate(range = c(-5, -1))),
+                                         update(mtry = mtry(range = c(1, 22))),
+                                                # trees = trees(range = c(500, 1000)),
+                                                # learn_rate = learn_rate(range = c(-5, -1))),
                                      size = 15),
     control   = control_grid(save_pred = TRUE, verbose = FALSE, allow_par = TRUE),
     metrics   = metric_set(mae, rmse, rsq)
@@ -220,7 +218,7 @@ tune_results_rf <- tune_grid(
     object    = wflw_spec_rf_tune,
     resamples = resamples_obj,
     grid      = grid_latin_hypercube(parameters(model_spec_ranger_tune) %>% 
-                                         update(mtry = mtry(range = c(1, 21))),
+                                         update(mtry = mtry(range = c(1, 22))),
                                      size = 15),
     control   = control_grid(save_pred = TRUE, verbose = FALSE, allow_par = TRUE),
     metrics   = metric_set(mae, rmse, rsq)
