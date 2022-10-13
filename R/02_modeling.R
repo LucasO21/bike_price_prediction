@@ -23,7 +23,9 @@ library(tictoc)
 # ******************************************************************************
 # LOAD DATA ----
 # ******************************************************************************
-bikes_tbl <- read_rds("../data/trekbikes_clead_data.rds") 
+bikes_tbl <- read_rds("../data/trekbikes_clead_data.rds") %>% 
+    rename(model_year = product_year) %>% 
+    rename(model_price = product_price)
 
 bikes_tbl %>% glimpse()
 bikes_tbl %>% sapply(function(x) sum(is.na(x)))
@@ -48,7 +50,7 @@ resamples_obj <- vfold_cv(train_tbl, v = 10)
 # ******************************************************************************
 # RECIPE ----
 # ******************************************************************************
-recipe_spec <- recipe(product_price ~ ., data = train_tbl) %>% 
+recipe_spec <- recipe(model_price ~ ., data = train_tbl) %>% 
     step_rm(product_id, model_tier, model_name) %>% 
     step_novel(family, model_base, frame_material, category) %>% 
     step_dummy(model_base, category, family, frame_material, one_hot = TRUE)
@@ -64,13 +66,13 @@ wflw_fit_glmnet <- workflow() %>%
     add_model(spec = linear_reg(penalty = 0.1, mixture = 0.5) %>% 
                   set_engine("glmnet")
     ) %>% 
-    add_recipe(recipe_spec %>% step_normalize(weight)) %>% 
+    add_recipe(recipe_spec %>% step_normalize(weight, model_year)) %>% 
     fit(train_tbl)
 
 # * SVM ----
 wflw_fit_svm <- workflow() %>% 
     add_model(spec = svm_rbf(mode = "regression") %>% set_engine("kernlab")) %>% 
-    add_recipe(recipe_spec %>% step_normalize(weight)) %>% 
+    add_recipe(recipe_spec %>% step_normalize(weight, model_year)) %>% 
     fit(train_tbl)
 
 # * Random Forest ----
@@ -104,11 +106,11 @@ wflw_fit_cubist <- workflow() %>%
 get_baseline_model_metrics <- function(model, new_data, model_name){
     
     pred_tbl <- predict(model, new_data = new_data) %>% 
-        bind_cols(new_data %>% select(product_price)) 
+        bind_cols(new_data %>% select(model_price)) 
     
     metrics <- metric_set(mae, rmse, rsq)
     
-    metrics_tbl <- metrics(pred_tbl, truth = product_price, estimate = .pred) %>% 
+    metrics_tbl <- metrics(pred_tbl, truth = model_price, estimate = .pred) %>% 
         select(.metric, .estimate) %>% 
         spread(.metric, .estimate) %>% 
         mutate(model = model_name, .before = mae)
@@ -169,12 +171,15 @@ tune_results_xgboost <- tune_grid(
     object    = wflw_spec_xgboost_tune,
     resamples = resamples_obj,
     grid      = grid_latin_hypercube(parameters(model_spec_xgboost_tune) %>% 
-                                         update(mtry = mtry(range = c(1, 21))),
+                                         update(mtry = mtry(range = c(1, 21)),
+                                                trees = trees(range = c(500, 1000)),
+                                                learn_rate = learn_rate(range = c(-5, -1))),
                                      size = 15),
     control   = control_grid(save_pred = TRUE, verbose = FALSE, allow_par = TRUE),
     metrics   = metric_set(mae, rmse, rsq)
 )
 toc()
+
 
 # ** Results ----
 tune_results_xgboost %>% show_best("rmse", n = 5)
@@ -208,7 +213,7 @@ wflw_spec_rf_tune <- workflow() %>%
     add_model(model_spec_ranger_tune) %>% 
     add_recipe(recipe_spec)
 
-# ** Tuning ----
+# ** Tuning Round 1 ----
 tic()
 set.seed(123)
 tune_results_rf <- tune_grid(
@@ -221,6 +226,7 @@ tune_results_rf <- tune_grid(
     metrics   = metric_set(mae, rmse, rsq)
 )
 toc()
+
 
 # ** Results ----
 tune_results_rf %>% show_best("rmse", n = 5)
