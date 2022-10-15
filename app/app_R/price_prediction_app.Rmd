@@ -1,0 +1,178 @@
+---
+title: "Price Prediction App"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+setwd(here::here("app", "app_R"))
+
+# Libraries
+
+# App
+library(flexdashboard)
+library(shiny)
+library(shinyjs)
+library(shinyWidgets)
+
+# Core
+library(tidyverse)
+library(tidyquant)
+
+# Visualization
+library(plotly)
+
+# Modeling
+library(tidymodels)
+
+# Artifacts & Data
+bikes_tbl <- read_rds("../app_data/bikes_data_clean_tbl.rds") %>% 
+    filter(frame_material %in% c("Carbon", "Aluminum"))
+
+#model_artifacts_list <- readRDS("../app_artifacts/model_artifacts.rds")
+
+ml_model_xgboost    <- readRDS("../app_artifacts/model_artifacts.rds")[[1]]
+ml_model_rf         <- readRDS("../app_artifacts/model_artifacts.rds")[[2]]
+ml_model_glmnet     <- readRDS("../app_artifacts/model_artifacts.rds")[[3]]
+ml_model_mars       <- readRDS("../app_artifacts/model_artifacts.rds")[[4]]
+
+# Scripts
+source("../app_functions/app_functions.R")
+```
+
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+```{r}
+# Inputs
+useShinyjs(rmd = TRUE)
+
+# Model Name Text Input
+selectizeInput(
+    inputId  = "text_bike_model", 
+    label    = h4("Bike Model"),
+    choices  = unique(bikes_tbl$model_name),
+    selected = unique(bikes_tbl$model_name)[[1]],
+    multiple = FALSE
+)
+
+# Family Input
+pickerInput(
+    inputId  = "bike_family",
+    label    = h4("Bike Family"),
+    choices  = unique(bikes_tbl$family),
+    selected = unique(bikes_tbl$family)[[1]]
+)
+
+# Frame Material Input
+pickerInput(
+    inputId  = "frame_material",
+    label    = h4("Frame Material"),
+    choices  = unique(bikes_tbl$frame_material),
+    selected = "Carbon"
+)
+
+br()
+
+# Model Input
+awesomeRadio(
+   inputId = "ml_model",
+   label = h4("Price Prediction Model"), 
+   choices = c("XGBOOST", "RANDOM FOREST", "GLMNET", "MARS"),
+   selected = "RANDOM FOREST",
+   status = "warning"
+)
+
+# Break
+br()
+hr()
+br()
+
+# Apply
+actionButton(inputId = "apply", label = "Apply", icon = icon(name = "play", lib = "font-awesome"))
+actionButton(inputId = "reset", label = "Reset", icon = icon("sync"))
+
+observeEvent(eventExpr = input$reset, handlerExpr = {
+    
+    updateselectizeInput(
+        session  = getDefaultReactiveDomain(), 
+        inputId  = "text_bike_model", 
+        choices  = unique(bikes_tbl$model_name),
+        selected = "Dual Sport+ 2 Stagger"
+    )
+    
+    delay(ms = 300, expr = {click(id = "apply")})
+})
+
+```
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+```{r}
+
+# Reactive
+new_bike_pred_tbl <- eventReactive(eventExpr = input$apply, valueExpr = {
+    
+    get_new_bike_price(
+        data                = bikes_tbl,
+        bike_model          = input$text_bike_model,
+        bike_family         = input$bike_family,
+        bike_frame_material = input$frame_material,
+        .ml_model           = input$ml_model
+  
+    )
+    
+}, ignoreNULL = FALSE)
+
+
+```
+
+### Price Prediction vs Product Portfolio
+
+```{r}
+
+output$plotly_1 <- renderPlotly({
+    get_price_prediction_data(bikes_tbl, new_bike_pred_tbl()) %>%
+    get_price_prediction_plot()
+})
+
+plotlyOutput("plotly_1")
+
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Price Prediction Used This Features
+
+```{r}
+
+# new_bike_pred_tbl_2 <- eventReactive(eventExpr = input$apply, valueExpr = {
+#     
+#      get_new_bike_price(
+#         data           = bikes_tbl,
+#         bike_model     = input$text_bike_model,
+#         bike_year      = 2023,
+#         .ml_model      = "RANDOM FOREST",
+#         return_fmt     = TRUE
+#     )
+# }, ignoreNULL = FALSE)
+
+renderTable({new_bike_pred_tbl() %>% get_new_bike_price_table()})
+    
+
+
+
+```
+
+### Bike Image
+
+```{r}
+
+```
+
