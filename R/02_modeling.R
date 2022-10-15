@@ -16,9 +16,9 @@ library(tidymodels)
 library(xgboost)
 library(rules)
 library(tictoc)
-# library(future)
-# library(doFuture)
-# library(parallel)
+library(future)
+library(doFuture)
+library(parallel)
 
 # ******************************************************************************
 # LOAD DATA ----
@@ -135,6 +135,12 @@ baseline_model_metrics_tbl <- bind_rows(
 # ******************************************************************************
 # HYPER - PARAMETER TUNING ----
 # ******************************************************************************
+
+# * Setup Up Parallel Processing ----
+registerDoFuture()
+n_cores <- detectCores()
+plan(strategy = cluster, workers = makeCluster(n_cores))
+
 
 # * XGBOOST TUNE ----
 # ** Spec ----
@@ -318,3 +324,4 @@ model_artifacts <- list(
 )
 
 model_artifacts %>% write_rds("../artifacts/model_artifacts.rds")
+model_artifacts %>% write_rds("../app/app_artifacts/model_artifacts.rds")
