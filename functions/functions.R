@@ -48,7 +48,7 @@ get_new_bike_price <- function(bike_model, bike_year, .ml_model){
         filter(model_name == bike_model & model_year == bike_year) 
     
     new_bike_price <- new_bike_tbl %>% 
-        predict(model, new_data = .) %>% 
+        predict(.ml_model, new_data = .) %>% 
         bind_cols(new_bike_tbl) %>%
         rename(price = .pred) %>% 
         select(-c(model_base, model_tier, model_price))
