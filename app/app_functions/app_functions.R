@@ -27,22 +27,23 @@ library(tidymodels)
 # data_tbl %>% count(frame_material)
 # 
 # data <- data_tbl
-# bike_model <- "Dual Sport+ 2 Stagger"
+# bike_model <- "Madone SLR eTap Gen 7"
 # bike_year  <- 2023
 # .ml_model  <- "RANDOM FOREST"
 
-# ml_model_xgboost    <- readRDS("../app_artifacts/model_artifacts.rds")[[1]]
-# ml_model_rf         <- readRDS("../app_artifacts/model_artifacts.rds")[[2]]
-# ml_model_glmnet     <- readRDS("../app_artifacts/model_artifacts.rds")[[3]]
-# ml_model_mars       <- readRDS("../app_artifacts/model_artifacts.rds")[[4]]
+ml_model_xgboost    <- readRDS("../app_artifacts/model_artifacts.rds")[[1]]
+ml_model_rf         <- readRDS("../app_artifacts/model_artifacts.rds")[[2]]
+ml_model_glmnet     <- readRDS("../app_artifacts/model_artifacts.rds")[[3]]
+ml_model_mars       <- readRDS("../app_artifacts/model_artifacts.rds")[[4]]
+# bike_family <-  "Aero"
+# bike_frame_material <-  "Carbon"
 
 # ******************************************************************************
 # FUNCTIONS ----
 # ******************************************************************************
 
 # PRICE PREDICTION FUNCTION ----
-get_new_bike_price <- function(data, bike_model, bike_family, bike_frame_material,
-                               .ml_model){
+get_new_bike_price <- function(data, bike_model, bike_family, bike_frame_material, .ml_model){
     
     # model setup
     if (.ml_model == "XGBOOST") model = ml_model_xgboost
@@ -60,7 +61,7 @@ get_new_bike_price <- function(data, bike_model, bike_family, bike_frame_materia
             battery = ifelse(family == "Electric", 1, battery),
             charger = ifelse(family == "Electric", 1, charger)
         ) %>% 
-        mutate(bike_year = 2023)
+        mutate(model_year = 2023)
         
     
     new_bike_pred_tbl <- new_bike_tbl %>% 
@@ -93,6 +94,8 @@ get_new_bike_price <- function(data, bike_model, bike_family, bike_frame_materia
 }
 
 # get_new_bike_price(data_tbl, bike_model, "Electric", "Aluminum", "RANDOM FOREST") %>% glimpse()
+
+
 
 
 # PRICE PREDICTION TABLE ----
@@ -181,3 +184,5 @@ get_price_prediction_plot <- function(data){
 # 
 # ) %>% 
 #     get_price_prediction_plot()
+
+
