@@ -4,6 +4,8 @@ output:
   flexdashboard::flex_dashboard:
     orientation: columns
     vertical_layout: fill
+    css: css/styles-default.css
+    #logo: img/trek_logo_2.jpeg
 runtime: shiny
 ---
 
@@ -47,7 +49,9 @@ source("../app_functions/app_functions.R")
 Column {.sidebar}
 -----------------------------------------------------------------------
 ```{r}
-# Inputs
+# INPUTS
+
+# * Adding Shinyjs
 useShinyjs(rmd = TRUE)
 
 # Model Name Text Input
@@ -59,8 +63,7 @@ selectizeInput(
     multiple = FALSE
 )
 
-
-# Family Input
+# * Family Picker Input
 pickerInput(
     inputId  = "bike_family",
     label    = h4("Bike Family"),
@@ -68,7 +71,17 @@ pickerInput(
     selected = unique(bikes_tbl$family)[[1]]
 )
 
-# Frame Material Input
+br()
+
+# * Bike Category Picker Input
+h4("Bike Category")
+output$bike_category <- reactive ({new_bike_pred_tbl() %>% pull(category)})
+
+textOutput(outputId = "bike_category") %>% em %>% strong()
+
+br()
+
+# * Frame Material Picker Input
 pickerInput(
     inputId  = "frame_material",
     label    = h4("Frame Material"),
@@ -78,7 +91,7 @@ pickerInput(
 
 br()
 
-# Model Input
+# * Model Selector
 awesomeRadio(
    inputId = "ml_model",
    label = h4("Price Prediction Model"), 
@@ -92,13 +105,13 @@ br()
 hr()
 br()
 
-# Apply Button
+# * Apply Button
 actionButton(inputId = "apply", label = "Apply", icon = icon(name = "play", lib = "font-awesome"))
 
-# Reset Button
+# * Reset Button
 actionButton(inputId = "reset", label = "Reset", icon = icon("sync"))
 
-# Rest Observe Events
+# * Reset Observe Events
 observeEvent(eventExpr = input$reset, handlerExpr = {
     
     updateSelectizeInput(
@@ -106,6 +119,24 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
         inputId  = "text_bike_model", 
         choices  = unique(bikes_tbl$model_name),
         selected = "Madone SLR 9 eTap Gen 7"
+    )
+    
+    updatePickerInput(
+        session  = getDefaultReactiveDomain(), 
+        inputId  = "bike_family", 
+        selected = "Aero"
+    )
+    
+    updatePickerInput(
+        session  = getDefaultReactiveDomain(), 
+        inputId  = "frame_material", 
+        selected = "Carbon"
+    )
+    
+    updateAwesomeRadio(
+        session  = getDefaultReactiveDomain(),
+        inputId  = "ml_model",
+        selected = "RANDOM FOREST"
     )
     
     delay(ms = 300, expr = {click(id = "apply")})
