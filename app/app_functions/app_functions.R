@@ -179,14 +179,5 @@ get_price_prediction_plot <- function(data){
     
 }
 
-# get_price_prediction_data(
-#     data_tbl,
-#     get_new_bike_price(data_tbl, bike_model, "Electric", "Aluminum", "RANDOM FOREST")
-# 
-# ) %>% 
-#     get_price_prediction_plot()
 
-# bikes_tbl$product_id
-
-bikes_tbl %>% slice(24) %>% glimpse()
 
