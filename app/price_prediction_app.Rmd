@@ -1,12 +1,13 @@
 ---
 title: "Price Prediction App"
-output: 
+output:
   flexdashboard::flex_dashboard:
     orientation: columns
     vertical_layout: fill
     css: css/styles-default.css
-    #logo: img/trek_logo_2.jpeg
 runtime: shiny
+resource_files: bike_img/
+
 ---
 
 ```{r setup, include=FALSE}
@@ -48,6 +49,7 @@ ml_model_mars       <- readRDS("app_artifacts/model_artifacts.rds")[[4]]
 
 # Scripts
 source("app_functions/app_functions.R")
+
 ```
 
 
@@ -212,17 +214,17 @@ renderImage({
 
   product_id <- new_bike_pred_tbl() %>% pull(product_id)
 
-  dir_files <- fs::dir_ls("bike_img")
+  dir_files  <- dir_ls("bike_img/")
 
-  dir_res <- dir_files %>% str_detect(product_id)
+  dir_res    <- dir_files %>% str_detect(pattern = str_glue("bike_img/product_id_{product_id}"))
 
-  path <- dir_files[dir_res]
+  path       <- dir_files[dir_res]
 
 
 
     list(
       src         = path,
-      contentType = "image/png",
+      contentType = "image/jpg",
       width       = "90%",
       alt         = product_id
     )
