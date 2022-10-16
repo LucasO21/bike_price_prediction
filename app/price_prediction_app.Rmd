@@ -33,6 +33,8 @@ library(plotly)
 library(tidymodels)
 library(xgboost)
 library(ranger)
+library(glmnet)
+library(earth)
 
 # Artifacts & Data
 bikes_tbl <- read_rds("app_data/bikes_data_clean_tbl.rds") %>% 
