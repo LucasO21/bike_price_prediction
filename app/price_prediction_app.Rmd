@@ -35,7 +35,7 @@ library(tidymodels)
 bikes_tbl <- read_rds("app_data/bikes_data_clean_tbl.rds") %>% 
   mutate(product_id = str_trim(product_id, side = c("both"))) %>% 
   filter(frame_material %in% c("Carbon", "Aluminum")) %>% 
-  filter(!model_name == "Supercaliber 9.9 XX1 ASX") %>% 
+  filter(!model_name == "Supercaliber 9.9 XX1 AXS") %>% 
   filter(!model_year == 2021)
 
 #model_artifacts_list <- readRDS("../app_artifacts/model_artifacts.rds")
@@ -228,64 +228,6 @@ renderImage({
 
 
 }, deleteFile = FALSE)
-
-# renderPrint({
-#    detect_product_id <- new_bike_pred_tbl() %>% pull(product_id) %>% glimpse()
-# })
-
-# ===============================================================================
-
-# output$bikeImage <- renderImage({
-# 
-#   # detect_product_id = "37420"
-# 
-#   path <- paste0("bike_img/product_id_", "37420", ".png")
-# 
-#   list(
-#     src         = path,
-#     contentType = "image/png",
-#     alt         = "37420"
-#   )
-# 
-# 
-#   }, deleteFile = FALSE )
-# 
-# imageOutput("bikeImage")
-
-# knitr::include_graphics("bike_img/product_id_17027.jpg")
-# eventReactive(eventExpr = input$apply, valueExpr = {
-#
-#   new_bike_pred_tbl %>% pull(product_id)
-#
-# }, ignoreNULL = FALSE)
-
-
-#knitr::include_graphics("product_id_37420.jpg")
-
-# knitr::include_graphics("bike_img/product_id_17027.jpg")
-
-# id <- "33085"
-# 
-# knitr::include_graphics(paste0("bike_img/product_id_", id, ".jpg"))
-
-# output$id <- reactive ({
-#   
-#   #knitr::include_graphics(paste0("bike_img/product_id_", new_bike_pred_tbl() %>% pull(product_id), ".jpg"))
-#   
-#   new_bike_pred_tbl() %>% pull(product_id)
-#   
-#   # knitr::include_graphics(paste0("bike_img/product_id_", id, ".jpg"))
-# 
-# })
-# 
-# textOutput(outputId = id)
-
-# knitr::include_graphics("bike_img/product_id_17027.jpg")
-
-
-
-
-
 
 ```
 
