@@ -30,6 +30,8 @@ library(plotly)
 
 # Modeling
 library(tidymodels)
+library(xgboost)
+library(ranger)
 
 # Artifacts & Data
 bikes_tbl <- read_rds("app_data/bikes_data_clean_tbl.rds") %>% 
@@ -210,7 +212,7 @@ renderImage({
 
   product_id <- new_bike_pred_tbl() %>% pull(product_id)
 
-  dir_files <- fs::dir_ls("bike_img/")
+  dir_files <- fs::dir_ls("bike_img")
 
   dir_res <- dir_files %>% str_detect(product_id)
 
