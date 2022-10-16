@@ -10,9 +10,9 @@ runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
-setwd(here::here("app", "app_R"))
+#setwd(here::here("app", "app_R"))
 
-# Libraries
+# LIBRARIES
 
 # App
 library(flexdashboard)
@@ -23,6 +23,7 @@ library(shinyWidgets)
 # Core
 library(tidyverse)
 library(tidyquant)
+library(fs)
 
 # Visualization
 library(plotly)
@@ -32,7 +33,10 @@ library(tidymodels)
 
 # Artifacts & Data
 bikes_tbl <- read_rds("../app_data/bikes_data_clean_tbl.rds") %>% 
-    filter(frame_material %in% c("Carbon", "Aluminum"))
+  mutate(product_id = str_trim(product_id, side = c("both"))) %>% 
+  filter(frame_material %in% c("Carbon", "Aluminum")) %>% 
+  filter(!model_name == "Supercaliber 9.9 XX1 ASX") %>% 
+  filter(!model_year == 2021)
 
 #model_artifacts_list <- readRDS("../app_artifacts/model_artifacts.rds")
 
@@ -73,6 +77,16 @@ pickerInput(
 
 br()
 
+# * Family Year Input
+pickerInput(
+    inputId  = "bike_year",
+    label    = h4("MFG Year"),
+    choices  = unique(bikes_tbl$model_year),
+    selected = unique(bikes_tbl$model_year)[[1]]
+)
+
+br()
+
 # * Bike Category Picker Input
 h4("Bike Category")
 output$bike_category <- reactive ({new_bike_pred_tbl() %>% pull(category)})
@@ -97,7 +111,7 @@ awesomeRadio(
    label = h4("Price Prediction Model"), 
    choices = c("XGBOOST", "RANDOM FOREST", "GLMNET", "MARS"),
    selected = "RANDOM FOREST",
-   status = "warning"
+   status = "primary"
 )
 
 # Break
@@ -155,6 +169,7 @@ new_bike_pred_tbl <- eventReactive(eventExpr = input$apply, valueExpr = {
     get_new_bike_price(
         data                = bikes_tbl,
         bike_model          = input$text_bike_model,
+        bike_year           = input$bike_year,
         bike_family         = input$bike_family,
         bike_frame_material = input$frame_material,
         .ml_model           = input$ml_model
@@ -162,16 +177,6 @@ new_bike_pred_tbl <- eventReactive(eventExpr = input$apply, valueExpr = {
     )
 
 }, ignoreNULL = FALSE)
-
-# get_new_bike_price(
-#         data                = bikes_tbl,
-#         bike_model          = "Madone SLR 9 eTap Gen 7",
-#         bike_family         = "Aero",
-#         bike_frame_material = "Carbon",
-#         .ml_model           = "RANDOM FOREST"
-# 
-#     )
-
 
 ```
 
@@ -186,9 +191,6 @@ output$plotly_1 <- renderPlotly({
 
 plotlyOutput("plotly_1")
 
-
-
-
 ```
 
 Column {data-width=350}
@@ -198,27 +200,92 @@ Column {data-width=350}
 
 ```{r}
 
-# new_bike_pred_tbl_2 <- eventReactive(eventExpr = input$apply, valueExpr = {
-#     
-#      get_new_bike_price(
-#         data           = bikes_tbl,
-#         bike_model     = input$text_bike_model,
-#         bike_year      = 2023,
-#         .ml_model      = "RANDOM FOREST",
-#         return_fmt     = TRUE
-#     )
-# }, ignoreNULL = FALSE)
-
 renderTable({new_bike_pred_tbl() %>% get_new_bike_price_table()})
-    
-
-
 
 ```
 
 ### Bike Image
 
 ```{r}
+renderPrint({
+
+  product_id <- new_bike_pred_tbl() %>% pull(product_id)
+
+  dir_files <- fs::dir_ls("product_img/")
+
+  dir_res <- dir_files %>% str_detect(product_id)
+
+  dir_files[dir_res]
+
+
+
+    # list(
+    #   src         = path_2,
+    #   contentType = "image/png",
+    #   width       = "100%",
+    #   alt         = detect_product_id
+    # )
+
+
+})
+
+# renderPrint({
+#    detect_product_id <- new_bike_pred_tbl() %>% pull(product_id) %>% glimpse()
+# })
+
+# ===============================================================================
+
+# output$bikeImage <- renderImage({
+# 
+#   # detect_product_id = "37420"
+# 
+#   path <- paste0("bike_img/product_id_", "37420", ".png")
+# 
+#   list(
+#     src         = path,
+#     contentType = "image/png",
+#     alt         = "37420"
+#   )
+# 
+# 
+#   }, deleteFile = FALSE )
+# 
+# imageOutput("bikeImage")
+
+# knitr::include_graphics("bike_img/product_id_17027.jpg")
+# eventReactive(eventExpr = input$apply, valueExpr = {
+#
+#   new_bike_pred_tbl %>% pull(product_id)
+#
+# }, ignoreNULL = FALSE)
+
+
+#knitr::include_graphics("product_id_37420.jpg")
+
+# knitr::include_graphics("bike_img/product_id_17027.jpg")
+
+# id <- "33085"
+# 
+# knitr::include_graphics(paste0("bike_img/product_id_", id, ".jpg"))
+
+# output$id <- reactive ({
+#   
+#   #knitr::include_graphics(paste0("bike_img/product_id_", new_bike_pred_tbl() %>% pull(product_id), ".jpg"))
+#   
+#   new_bike_pred_tbl() %>% pull(product_id)
+#   
+#   # knitr::include_graphics(paste0("bike_img/product_id_", id, ".jpg"))
+# 
+# })
+# 
+# textOutput(outputId = id)
+
+# knitr::include_graphics("bike_img/product_id_17027.jpg")
+
+
+
+
+
 
 ```
 

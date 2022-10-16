@@ -21,7 +21,7 @@ library(tidymodels)
 
 # model_artifacts_list <- read_rds("../artifacts/model_artifacts.rds")
 # 
-# data_tbl <- read_rds("../data/bikes_data_clean_tbl.rds") %>% filter(frame_material %in% c("Carbon", "Aluminum"))
+# data_tbl <- read_rds("../app_data/bikes_data_clean_tbl.rds") %>% filter(frame_material %in% c("Carbon", "Aluminum"))
 # 
 # data_tbl %>% View()
 # data_tbl %>% count(frame_material)
@@ -43,7 +43,7 @@ ml_model_mars       <- readRDS("../app_artifacts/model_artifacts.rds")[[4]]
 # ******************************************************************************
 
 # PRICE PREDICTION FUNCTION ----
-get_new_bike_price <- function(data, bike_model, bike_family, bike_frame_material, .ml_model){
+get_new_bike_price <- function(data, bike_model, bike_year, bike_family, bike_frame_material, .ml_model){
     
     # model setup
     if (.ml_model == "XGBOOST") model = ml_model_xgboost
@@ -52,7 +52,7 @@ get_new_bike_price <- function(data, bike_model, bike_family, bike_frame_materia
     if (.ml_model == "MARS") model = ml_model_mars
     
     new_bike_tbl <- data %>% 
-        filter(model_name == bike_model) %>% 
+        filter(model_name == bike_model & bike_year == bike_year) %>% 
         mutate(
             family = bike_family,
             frame_material = bike_frame_material
@@ -60,8 +60,9 @@ get_new_bike_price <- function(data, bike_model, bike_family, bike_frame_materia
         mutate(
             battery = ifelse(family == "Electric", 1, battery),
             charger = ifelse(family == "Electric", 1, charger)
-        ) %>% 
-        mutate(model_year = 2023)
+        ) 
+    # %>% 
+    #     mutate(model_year = 2023)
         
     
     new_bike_pred_tbl <- new_bike_tbl %>% 
@@ -184,5 +185,6 @@ get_price_prediction_plot <- function(data){
 # 
 # ) %>% 
 #     get_price_prediction_plot()
+
 
 
