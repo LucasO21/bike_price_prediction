@@ -36,6 +36,6 @@ how the price changes based on such inputs.
 
 ![Oct-16-2022 09-05-09](https://user-images.githubusercontent.com/62886078/196037480-b2b040ff-385e-484e-837b-6c3d6faa2bc1.gif)
 
-You can interact with the app [here](). 
+You can interact with the app [here](https://lucas-okwudishu.shinyapps.io/price_prediction_app/?_ga=2.35939360.1020703531.1665930622-498138199.1665930622). 
 
 
