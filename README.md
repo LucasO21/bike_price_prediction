@@ -2,13 +2,16 @@
 
 ================================================================================
 
-**Project Goal** - An end to end analysis project to predict create data driven competitive
+### Project Goal  
+An end to end analysis project to predict create data driven competitive
 pricing strategy for a hypothetical bike manufacturer.
 
-**Data** - Data used in this project was retrieved via web-scraping from Trek bikes 
+### Data
+Data used in this project was retrieved via web-scraping from Trek bikes 
 [website](https://www.trekbikes.com/us/en_US/). See reproducible web-scraping code [here]().
 
-**Analysis Approach** - Machine learning models were used to determine pricing based
+### Analysis Approach
+Machine learning models were used to determine pricing based
 on certain bike features including model, year, frame material (carbon or aluminum),
 category (road or mountain bike), and other bike features such as if the bike was 
 electrical or not, if the bike had shocks, etc. Additionally certain keywords in the 
@@ -26,7 +29,8 @@ The GLMNET (Linear Regression) and MARS (Multivariate Adaptive Regression Spline
 provided slight lower price points than the RANDOM FOREST or XGBOOST. These two models 
 can be used to markdown prices as needed. See reproducible modeling code [here](https://github.com/LucasO21/bike_price_prediction/blob/main/R/02_modeling.R).
 
-**Deployment** - This analysis was deployed via shiny apps. To use the app,
+### Deployment
+This analysis was deployed via shiny apps. To use the app,
 a user can enter inputs such as bike model, year, frame material and pricing model to see
 how the price changes based on such inputs.
 
