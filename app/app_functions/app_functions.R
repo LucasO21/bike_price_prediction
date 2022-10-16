@@ -19,18 +19,6 @@ library(tidymodels)
 # LOAD ARTIFACTS ----
 # ******************************************************************************
 
-# model_artifacts_list <- read_rds("../artifacts/model_artifacts.rds")
-# 
-# data_tbl <- read_rds("../app_data/bikes_data_clean_tbl.rds") %>% filter(frame_material %in% c("Carbon", "Aluminum"))
-# 
-# data_tbl %>% View()
-# data_tbl %>% count(frame_material)
-# 
-# data <- data_tbl
-# bike_model <- "Madone SLR eTap Gen 7"
-# bike_year  <- 2023
-# .ml_model  <- "RANDOM FOREST"
-
 ml_model_xgboost    <- readRDS("app_artifacts/model_artifacts.rds")[[1]]
 ml_model_rf         <- readRDS("app_artifacts/model_artifacts.rds")[[2]]
 ml_model_glmnet     <- readRDS("app_artifacts/model_artifacts.rds")[[3]]
@@ -94,10 +82,6 @@ get_new_bike_price <- function(data, bike_model, bike_year, bike_family, bike_fr
     
 }
 
-# get_new_bike_price(data_tbl, bike_model, "Electric", "Aluminum", "RANDOM FOREST") %>% glimpse()
-
-
-
 
 # PRICE PREDICTION TABLE ----
 get_new_bike_price_table <- function(data){
@@ -120,10 +104,6 @@ get_new_bike_price_table <- function(data){
     return(data_prep)
 }
 
-# get_new_bike_price(data_tbl, bike_model, "Electric", "Aluminum", "RANDOM FOREST") %>%
-#     get_new_bike_price_table()
-
-
 
 # PREP DATA FOR PREDICTION PLOT ----
 get_price_prediction_data <- function(data, new_bike_pred_tbl){
@@ -142,12 +122,6 @@ get_price_prediction_data <- function(data, new_bike_pred_tbl){
     
     
 }
-
-# get_price_prediction_data(
-#     data_tbl,
-#     get_new_bike_price(data_tbl, bike_model, "Electric", "Aluminum", "RANDOM FOREST")
-#     
-# ) %>% tail()
 
 
 # PREDICTION PLOT ----
