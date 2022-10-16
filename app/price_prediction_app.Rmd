@@ -38,7 +38,6 @@ bikes_tbl <- read_rds("app_data/bikes_data_clean_tbl.rds") %>%
   filter(!model_name == "Supercaliber 9.9 XX1 AXS") %>% 
   filter(!model_year == 2021)
 
-#model_artifacts_list <- readRDS("../app_artifacts/model_artifacts.rds")
 
 ml_model_xgboost    <- readRDS("app_artifacts/model_artifacts.rds")[[1]]
 ml_model_rf         <- readRDS("app_artifacts/model_artifacts.rds")[[2]]
