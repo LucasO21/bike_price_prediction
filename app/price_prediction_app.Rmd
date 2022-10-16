@@ -32,7 +32,7 @@ library(plotly)
 library(tidymodels)
 
 # Artifacts & Data
-bikes_tbl <- read_rds("../app_data/bikes_data_clean_tbl.rds") %>% 
+bikes_tbl <- read_rds("app_data/bikes_data_clean_tbl.rds") %>% 
   mutate(product_id = str_trim(product_id, side = c("both"))) %>% 
   filter(frame_material %in% c("Carbon", "Aluminum")) %>% 
   filter(!model_name == "Supercaliber 9.9 XX1 ASX") %>% 
@@ -40,13 +40,13 @@ bikes_tbl <- read_rds("../app_data/bikes_data_clean_tbl.rds") %>%
 
 #model_artifacts_list <- readRDS("../app_artifacts/model_artifacts.rds")
 
-ml_model_xgboost    <- readRDS("../app_artifacts/model_artifacts.rds")[[1]]
-ml_model_rf         <- readRDS("../app_artifacts/model_artifacts.rds")[[2]]
-ml_model_glmnet     <- readRDS("../app_artifacts/model_artifacts.rds")[[3]]
-ml_model_mars       <- readRDS("../app_artifacts/model_artifacts.rds")[[4]]
+ml_model_xgboost    <- readRDS("app_artifacts/model_artifacts.rds")[[1]]
+ml_model_rf         <- readRDS("app_artifacts/model_artifacts.rds")[[2]]
+ml_model_glmnet     <- readRDS("app_artifacts/model_artifacts.rds")[[3]]
+ml_model_mars       <- readRDS("app_artifacts/model_artifacts.rds")[[4]]
 
 # Scripts
-source("../app_functions/app_functions.R")
+source("app_functions/app_functions.R")
 ```
 
 
@@ -207,27 +207,27 @@ renderTable({new_bike_pred_tbl() %>% get_new_bike_price_table()})
 ### Bike Image
 
 ```{r}
-renderPrint({
+renderImage({
 
   product_id <- new_bike_pred_tbl() %>% pull(product_id)
 
-  dir_files <- fs::dir_ls("product_img/")
+  dir_files <- fs::dir_ls("bike_img/")
 
   dir_res <- dir_files %>% str_detect(product_id)
 
-  dir_files[dir_res]
+  path <- dir_files[dir_res]
 
 
 
-    # list(
-    #   src         = path_2,
-    #   contentType = "image/png",
-    #   width       = "100%",
-    #   alt         = detect_product_id
-    # )
+    list(
+      src         = path,
+      contentType = "image/png",
+      width       = "90%",
+      alt         = product_id
+    )
 
 
-})
+}, deleteFile = FALSE)
 
 # renderPrint({
 #    detect_product_id <- new_bike_pred_tbl() %>% pull(product_id) %>% glimpse()

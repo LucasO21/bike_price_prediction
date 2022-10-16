@@ -31,10 +31,10 @@ library(tidymodels)
 # bike_year  <- 2023
 # .ml_model  <- "RANDOM FOREST"
 
-ml_model_xgboost    <- readRDS("../app_artifacts/model_artifacts.rds")[[1]]
-ml_model_rf         <- readRDS("../app_artifacts/model_artifacts.rds")[[2]]
-ml_model_glmnet     <- readRDS("../app_artifacts/model_artifacts.rds")[[3]]
-ml_model_mars       <- readRDS("../app_artifacts/model_artifacts.rds")[[4]]
+ml_model_xgboost    <- readRDS("app_artifacts/model_artifacts.rds")[[1]]
+ml_model_rf         <- readRDS("app_artifacts/model_artifacts.rds")[[2]]
+ml_model_glmnet     <- readRDS("app_artifacts/model_artifacts.rds")[[3]]
+ml_model_mars       <- readRDS("app_artifacts/model_artifacts.rds")[[4]]
 # bike_family <-  "Aero"
 # bike_frame_material <-  "Carbon"
 
@@ -186,5 +186,7 @@ get_price_prediction_plot <- function(data){
 # ) %>% 
 #     get_price_prediction_plot()
 
+# bikes_tbl$product_id
 
+bikes_tbl %>% slice(24) %>% glimpse()
 
