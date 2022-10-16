@@ -30,6 +30,8 @@ can be used to markdown prices as needed. See reproducible modeling code [here](
 a user can enter inputs such as bike model, year, frame material and pricing model to see
 how the price changes based on such inputs.
 
+![Oct-16-2022 09-05-09](https://user-images.githubusercontent.com/62886078/196037480-b2b040ff-385e-484e-837b-6c3d6faa2bc1.gif)
+
 You can interact with the app [here](). 
 
 
