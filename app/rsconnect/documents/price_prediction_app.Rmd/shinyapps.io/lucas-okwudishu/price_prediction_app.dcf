@@ -5,9 +5,9 @@ account: lucas-okwudishu
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 7320816
-bundleId: 6409017
+bundleId: 6429562
 url: https://lucas-okwudishu.shinyapps.io/price_prediction_app/
-when: 1665956480.0072
-lastSyncTime: 1665956480.00725
+when: 1666429298.20523
+lastSyncTime: 1666429298.20527
 asMultiple: FALSE
 asStatic: FALSE
