@@ -1,9 +1,9 @@
-# Bike Price Prediction
+# Bike Pricing Recommender
 
 ================================================================================
 
 ### Project Goal  
-An end to end analysis project to predict create data driven competitive
+An end to end analysis project to recommend data driven competitive
 pricing strategy for a hypothetical bike manufacturer.
 
 ### Data
@@ -19,7 +19,7 @@ bike specs were also used to predict price such as ultegra, dura-ace, disc, shim
 All these keywords highlight presence of certain features as well as manufacturers 
 of certain bike parts. See reproducible data prep and feature engineering script [here](https://github.com/LucasO21/bike_price_prediction/blob/main/R/01_data_preparation.R).
 
-4 machine learning models are used for predicting bike prices. In an ideal scenario,
+4 machine learning models are used for recommending bike prices. In an ideal scenario,
 a manufacturer may want to have several pricing strategies to enable price markups or 
 markdowns as needed. The RANDOM FOREST model appeared to provide the most 
 *competitive* prices (meaning the predicted price was closest to the actual price
