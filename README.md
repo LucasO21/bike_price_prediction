@@ -8,7 +8,7 @@ pricing strategy for a hypothetical bike manufacturer.
 
 ### Data
 Data used in this project was retrieved via web-scraping from Trek bikes 
-[website](https://www.trekbikes.com/us/en_US/). See reproducible web-scraping code [here]().
+[website](https://www.trekbikes.com/us/en_US/). See reproducible web-scraping code [here](https://github.com/LucasO21/bike_pricing_recommender/blob/main/R/00_web_scraping.R).
 
 ### Analysis Approach
 Machine learning models were used to determine pricing based
